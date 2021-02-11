@@ -13,12 +13,12 @@ class QtAT4 < Formula
     # bugreports.qt.io may go away, use our local copy.
     #url "https://bugreports.qt.io/secure/attachment/52520/patch-qthread-stacksize.diff"
     #sha256 "477630235eb5ee34ed04e33f156625d1724da290e7a66b745611fb49d17f1347"
-    url "https://raw.githubusercontent.com/NatronGitHub/Natron/master/tools/MacPorts/aqua/qt4-mac/files/patch-qthread-stacksize.diff"
+    url "https://raw.githubusercontent.com/NatronGitHub/Natron/ff4b3afd3a784f1517002bd82e2da441265385ad/tools/MacPorts/aqua/qt4-mac/files/patch-qthread-stacksize.diff"
     sha256 "a3363ff6460fb4cb4a2a311dbc0724fc5de39d22eb6fa1ec1680d6bd28d01ee4"
   end
 
   patch :p0 do
-    url "https://raw.githubusercontent.com/NatronGitHub/Natron/master/tools/MacPorts/aqua/qt4-mac/files/patch-qt-custom-threadpool.diff"
+    url "https://raw.githubusercontent.com/NatronGitHub/Natron/ff4b3afd3a784f1517002bd82e2da441265385ad/tools/MacPorts/aqua/qt4-mac/files/patch-qt-custom-threadpool.diff"
     sha256 "470c8bf6fbcf01bd15210aad961a476abc73470e201ccb4d62a7c579452de371"
   end
 
