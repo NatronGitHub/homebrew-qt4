@@ -19,7 +19,7 @@ class QtAT4 < Formula
 
   patch :p0 do
     url "https://raw.githubusercontent.com/NatronGitHub/Natron/master/tools/MacPorts/aqua/qt4-mac/files/patch-qt-custom-threadpool.diff"
-    sha256 "42c555937269b36c1a34d2a183ea98cf8ab1aac9f4af447ece635a49e738524e"
+    sha256 "470c8bf6fbcf01bd15210aad961a476abc73470e201ccb4d62a7c579452de371"
   end
 
   # Backport of Qt5 commit to fix the fatal build error with Xcode 7, SDK 10.11.
