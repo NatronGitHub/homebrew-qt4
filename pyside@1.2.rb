@@ -26,13 +26,13 @@ class PysideAT12 < Formula
 
   depends_on "cmake" => :build
   depends_on "sphinx-doc" => :build if build.with? "docs"
-  depends_on "cartr/qt4/qt@4"
-  depends_on "cartr/qt4/qt-webkit@2.3"
+  depends_on "NatronGitHub/qt4/qt@4"
+  depends_on "NatronGitHub/qt4/qt-webkit@2.3"
 
   if build.with? "python"
-    depends_on "cartr/qt4/shiboken@1.2" => "with-python"
+    depends_on "NatronGitHub/qt4/shiboken@1.2" => "with-python"
   else
-    depends_on "cartr/qt4/shiboken@1.2"
+    depends_on "NatronGitHub/qt4/shiboken@1.2"
   end
 
   def install

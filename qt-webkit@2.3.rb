@@ -5,7 +5,7 @@ class QtWebkitAT23 < Formula
   sha256 "c6cfa9d068f7eb024fee3f6c24f5b8b726997f669007587f35ed4a97d40097ca"
   revision 1
 
-  depends_on "cartr/qt4/qt@4"
+  depends_on "NatronGitHub/qt4/qt@4"
 
   # Put data and import files into this formula's cellar instead of installing them globally.
   patch :DATA

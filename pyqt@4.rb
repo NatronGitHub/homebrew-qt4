@@ -12,8 +12,8 @@ class PyqtAT4 < Formula
     odie "pyqt: --with-python must be specified when using --without-python@2"
   end
 
-  depends_on "cartr/qt4/qt@4"
-  depends_on "cartr/qt4/qt-webkit@2.3" => :recommended
+  depends_on "NatronGitHub/qt4/qt@4"
+  depends_on "NatronGitHub/qt4/qt-webkit@2.3" => :recommended
 
   if build.with? "python"
     depends_on "sip" => "with-python"

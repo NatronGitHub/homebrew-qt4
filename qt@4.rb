@@ -2,11 +2,24 @@ class QtAT4 < Formula
   desc "Cross-platform application and UI framework"
   homepage "https://www.qt.io/"
   url "https://download.qt.io/archive/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz"
-  mirror "https://mirrors.ocf.berkeley.edu/qt/archive/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz"
+  mirror "https://ftp.osuosl.org/pub/blfs/conglomeration/qt4/qt-everywhere-opensource-src-4.8.7.tar.gz"
   sha256 "e2882295097e47fe089f8ac741a95fef47e0a73a3f3cdf21b56990638f626ea0"
-  revision 6
+  revision 7
 
   head "https://code.qt.io/qt/qt.git", :branch => "4.8"
+
+  # https://bugreports.qt.io/browse/QTBUG-49607
+  patch :p0 do
+    # bugreports.qt.io may go away, use our local copy.
+    #url "https://bugreports.qt.io/secure/attachment/52520/patch-qthread-stacksize.diff"
+    url "https://raw.githubusercontent.com/NatronGitHub/Natron/master/tools/MacPorts/aqua/qt4-mac/files/patch-qthread-stacksize.diff"
+    sha256 "477630235eb5ee34ed04e33f156625d1724da290e7a66b745611fb49d17f1347"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/NatronGitHub/Natron/master/tools/MacPorts/aqua/qt4-mac/files/patch-qt-custom-threadpool.diff"
+    sha256 "42c555937269b36c1a34d2a183ea98cf8ab1aac9f4af447ece635a49e738524e"
+  end
 
   # Backport of Qt5 commit to fix the fatal build error with Xcode 7, SDK 10.11.
   # https://code.qt.io/cgit/qt/qtbase.git/commit/?id=b06304e164ba47351fa292662c1e6383c081b5ca
@@ -199,9 +212,9 @@ class QtAT4 < Formula
     assert_match(/GitHub/, pipe_output(testpath/"qtnetwork-test 2>&1", nil, 0))
   end
   
-  bottle do
-    root_url "https://dl.bintray.com/cartr/autobottle-qt4"
-    sha256 "6c66adaf110ce3534d7ced855b51ae744e0a4750f4daaff635928e7476183c35" => :mojave
-    sha256 "2049444b31e01a2690f3d19663a6ec8b9c28e19741af24f936796431450767fb" => :high_sierra
-  end
+#  bottle do
+#    root_url "https://dl.bintray.com/cartr/autobottle-qt4"
+#    sha256 "6c66adaf110ce3534d7ced855b51ae744e0a4750f4daaff635928e7476183c35" => :mojave
+#    sha256 "2049444b31e01a2690f3d19663a6ec8b9c28e19741af24f936796431450767fb" => :high_sierra
+#  end
 end

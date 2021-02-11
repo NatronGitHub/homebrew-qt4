@@ -2,8 +2,7 @@
 
 This Homebrew tap allows you to install Qt4 (and various packages that depend on it) on macOS Sierra and newer. You can install it like this:
 
-    brew tap cartr/qt4
-    brew install qt@4
+    brew install NatronGitHub/qt4/qt-legacy-formula
 
 Feel free to submit an issue or pull request if you run into any problems or have any suggestions for improvements to the packages.
 
