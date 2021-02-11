@@ -213,9 +213,4 @@ class QtAT4 < Formula
     assert_match(/GitHub/, pipe_output(testpath/"qtnetwork-test 2>&1", nil, 0))
   end
   
-#  bottle do
-#    root_url "https://dl.bintray.com/cartr/autobottle-qt4"
-#    sha256 "6c66adaf110ce3534d7ced855b51ae744e0a4750f4daaff635928e7476183c35" => :mojave
-#    sha256 "2049444b31e01a2690f3d19663a6ec8b9c28e19741af24f936796431450767fb" => :high_sierra
-#  end
 end
