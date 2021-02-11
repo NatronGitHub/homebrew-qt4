@@ -66,10 +66,10 @@ class QwtQt4 < Formula
     EOS
     system ENV.cxx, "test.cpp", "-o", "out",
       "-framework", "qwt", "-framework", "QtCore",
-      "-F#{lib}", "-F#{Formula["cartr/qt4/qt@4"].opt_lib}",
+      "-F#{lib}", "-F#{Formula["NatronGitHub/qt4/qt@4"].opt_lib}",
       "-I#{lib}/qwt.framework/Headers",
-      "-I#{Formula["cartr/qt4/qt@4"].opt_lib}/QtCore.framework/Headers",
-      "-I#{Formula["cartr/qt4/qt@4"].opt_lib}/QtGui.framework/Headers"
+      "-I#{Formula["NatronGitHub/qt4/qt@4"].opt_lib}/QtCore.framework/Headers",
+      "-I#{Formula["NatronGitHub/qt4/qt@4"].opt_lib}/QtGui.framework/Headers"
     system "./out"
   end
 end

@@ -11,7 +11,7 @@ class QtWebkitAT23 < Formula
   patch :DATA
 
   def install
-    ENV["QTDIR"] = Formula["cartr/qt4/qt@4"].opt_prefix
+    ENV["QTDIR"] = Formula["NatronGitHub/qt4/qt@4"].opt_prefix
     ENV["INSTALL_DATA"] = "#{prefix}/etc/qt4"
     ENV["INSTALL_LIBS"] = lib
     system "Tools/Scripts/build-webkit", "--qt", "--no-webkit2", "--no-video", "--install-headers=#{include}", "--install-libs=#{lib}", "--minimal"

@@ -55,8 +55,8 @@ class PyqtAT4 < Formula
         cp_r(Dir.glob("*"), dir)
         cd dir do
           system python, "configure.py", *args
-          inreplace "pyqtconfig.py", "#{HOMEBREW_CELLAR}/#{Formula["cartr/qt4/qt@4"].name}/#{Formula["cartr/qt4/qt@4"].pkg_version}",
-            Formula["cartr/qt4/qt@4"].opt_prefix
+          inreplace "pyqtconfig.py", "#{HOMEBREW_CELLAR}/#{Formula["NatronGitHub/qt4/qt@4"].name}/#{Formula["NatronGitHub/qt4/qt@4"].pkg_version}",
+            Formula["NatronGitHub/qt4/qt@4"].opt_prefix
           (lib/"python#{version}/site-packages/PyQt4").install "pyqtconfig.py"
         end
       ensure

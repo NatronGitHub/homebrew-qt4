@@ -45,7 +45,7 @@ class Qwtpolar < Formula
       args << "macx-g++"
     end
 
-    ENV["QMAKEFEATURES"] = "#{Formula["cartr/qt4/qwt-qt4"].opt_prefix}/features"
+    ENV["QMAKEFEATURES"] = "#{Formula["NatronGitHub/qt4/qwt-qt4"].opt_prefix}/features"
     system "qmake", *args
     system "make"
     system "make", "install"

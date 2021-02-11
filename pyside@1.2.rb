@@ -40,7 +40,7 @@ class PysideAT12 < Formula
       abi = `#{python} -c 'import sysconfig as sc; print(sc.get_config_var("SOABI"))'`.strip
       python_suffix = python == "python2.7" ? "-python2.7" : ".#{abi}"
       mkdir "macbuild#{version}" do
-        qt = Formula["cartr/qt4/qt@4"].opt_prefix
+        qt = Formula["NatronGitHub/qt4/qt@4"].opt_prefix
         args = std_cmake_args + %W[
           -DSITE_PACKAGE=#{lib}/python#{version}/site-packages
           -DALTERNATIVE_QT_INCLUDE_DIR=#{HOMEBREW_PREFIX}/include

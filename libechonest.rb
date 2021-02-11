@@ -26,7 +26,7 @@ class Libechonest < Formula
         return 0;
       }
     EOS
-    qt = Formula["cartr/qt4/qt@4"]
+    qt = Formula["NatronGitHub/qt4/qt@4"]
     system ENV.cxx, "test.cpp", "-L#{lib}", "-lechonest", "-F#{qt.opt_lib}",
       "-framework", "QtCore", "-I#{qt.opt_include}/QtCore",
       "-I#{qt.opt_include}/QtNetwork", "-o", "test"
