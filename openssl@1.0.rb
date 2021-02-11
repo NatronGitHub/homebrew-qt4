@@ -8,7 +8,9 @@ class OpensslAT10 < Formula
 
   bottle do
     root_url "https://dl.bintray.com/devernay/bottles-qt4"
-    sha256 "faa8d3dc06601237a6f42a93ec6d8b0229426f01ea109e3fab691ac1cf9fd681" => :mojave
+    rebuild 1
+    sha256 big_sur: "0fcf1e16cb0637bc46f10bbf3b55b2e0881ff42a605a04829231b86a8c26a742"
+    sha256 mojave: "faa8d3dc06601237a6f42a93ec6d8b0229426f01ea109e3fab691ac1cf9fd681"
   end
 
   keg_only :provided_by_macos,

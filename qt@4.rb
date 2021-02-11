@@ -8,6 +8,11 @@ class QtAT4 < Formula
 
   head "https://code.qt.io/qt/qt.git", :branch => "4.8"
 
+  bottle do
+    root_url "https://dl.bintray.com/devernay/bottles-qt4"
+    sha256 cellar: :any, big_sur: "c24705d4793b4e8a8fcde048dd3baab9bcbd0feb3945623a41d8e51373743e57"
+  end
+
   # https://bugreports.qt.io/browse/QTBUG-49607
   patch :p0 do
     # bugreports.qt.io may go away, use our local copy.
