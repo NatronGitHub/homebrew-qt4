@@ -1,23 +1,23 @@
 class ShibokenAT12 < Formula
   desc "C++ GeneratorRunner plugin for CPython extensions"
   homepage "https://wiki.qt.io/PySide"
-  url "https://codeload.github.com/pyside/Shiboken/tar.gz/1.2.4"
+  url "https://github.com/pyside/Shiboken/archive/1.2.4.tar.gz"
   mirror "https://distfiles.macports.org/py-shiboken/Shiboken-1.2.4.tar.gz"
   sha256 "1536f73a3353296d97a25e24f9554edf3e6a48126886f8d21282c3645ecb96a4"
 
   head "https://github.com/PySide/Shiboken.git"
 
   bottle do
-    cellar :any
     root_url "https://dl.bintray.com/devernay/bottles-qt4"
-    sha256 "9ee4301c0fb346c05db64e1b83575dd5f545f5e6a5995d93c24bac1128209914" => :mojave
+    sha256 cellar: :any, mojave: "9ee4301c0fb346c05db64e1b83575dd5f545f5e6a5995d93c24bac1128209914"
   end
+
+  option "without-python@2", "Build without python 2 support"
 
   depends_on "cmake" => :build
   depends_on "NatronGitHub/qt4/qt@4"
 
   # don't use depends_on :python because then bottles install Homebrew's python
-  option "without-python@2", "Build without python 2 support"
   depends_on "python@2" => :recommended if MacOS.version <= :snow_leopard
   depends_on "python" => :optional
 

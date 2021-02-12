@@ -9,7 +9,7 @@ class Libechonest < Formula
   depends_on "NatronGitHub/qt4/qt@4"
   depends_on "qjson"
 
-  conflicts_with "doxygen", :because => "cmake fails to configure build."
+  conflicts_with "doxygen", because: "cmake fails to configure build"
 
   def install
     system "cmake", ".", *std_cmake_args

@@ -11,7 +11,7 @@ class PysideToolsAT12 < Formula
     root_url "https://dl.bintray.com/devernay/bottles-qt4"
     rebuild 3
     sha256 cellar: :any, big_sur: "a000cc61dca07e10438f7c91ad731b9ae8d3883b922eb4f04d59df2f03ac12c6"
-    sha256 mojave: "6eda5d9dc88477e751efb4d0985074e1163bfe42e48805f1f4a689b01fb230cf"
+    sha256               mojave:  "6eda5d9dc88477e751efb4d0985074e1163bfe42e48805f1f4a689b01fb230cf"
   end
 
   depends_on "cmake" => :build

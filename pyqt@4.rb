@@ -5,15 +5,20 @@ class PyqtAT4 < Formula
   sha256 "3224ab2c4d392891eb0abbc2bf076fef2ead3a5bb36ceae2383df4dda00ccce5"
   revision 1
 
+  bottle do
+    rebuild 1
+    root_url "https://dl.bintray.com/devernay/bottles-qt4"
+    sha256 mojave: "e44d7923a06753626ffc9bf6736b9641eb2b653bbd6ea34c841e1aaf2b9aadae"
+  end
+
   option "without-python@2", "Build without python 2 support"
+  depends_on "NatronGitHub/qt4/qt@4"
+  depends_on "NatronGitHub/qt4/qt-webkit@2.3" => :recommended
   depends_on "python" => :optional
 
   if build.without?("python") && build.without?("python@2")
     odie "pyqt: --with-python must be specified when using --without-python@2"
   end
-
-  depends_on "NatronGitHub/qt4/qt@4"
-  depends_on "NatronGitHub/qt4/qt-webkit@2.3" => :recommended
 
   if build.with? "python"
     depends_on "sip" => "with-python"
@@ -23,9 +28,7 @@ class PyqtAT4 < Formula
 
   def install
     # On Mavericks we want to target libc++, this requires a non default qt makespec
-    if ENV.compiler == :clang && MacOS.version >= :mavericks
-      ENV.append "QMAKESPEC", "unsupported/macx-clang-libc++"
-    end
+    ENV.append "QMAKESPEC", "unsupported/macx-clang-libc++" if ENV.compiler == :clang && MacOS.version >= :mavericks
 
     Language::Python.each_python(build) do |python, version|
       ENV.append_path "PYTHONPATH", "#{Formula["sip"].opt_lib}/python#{version}/site-packages"
@@ -64,9 +67,7 @@ class PyqtAT4 < Formula
       end
 
       # On Mavericks we want to target libc++, this requires a non default qt makespec
-      if ENV.compiler == :clang && MacOS.version >= :mavericks
-        args << "--spec" << "unsupported/macx-clang-libc++"
-      end
+      args << "--spec" << "unsupported/macx-clang-libc++" if ENV.compiler == :clang && MacOS.version >= :mavericks
 
       args << "--no-stubs"
 
@@ -90,11 +91,5 @@ class PyqtAT4 < Formula
     Language::Python.each_python(build) do |python, _version|
       system python, "test.py"
     end
-  end
-  
-  bottle do
-    rebuild 1
-    root_url "https://dl.bintray.com/devernay/bottles-qt4"
-    sha256 "e44d7923a06753626ffc9bf6736b9641eb2b653bbd6ea34c841e1aaf2b9aadae" => :mojave
   end
 end

@@ -5,6 +5,11 @@ class QtWebkitAT23 < Formula
   sha256 "c6cfa9d068f7eb024fee3f6c24f5b8b726997f669007587f35ed4a97d40097ca"
   revision 1
 
+  bottle do
+    root_url "https://dl.bintray.com/devernay/bottles-qt4"
+    sha256 mojave: "773ffe1a0c26ab27824bed4d1d5fa55655ca0f454cc938585d122ae000fd21ff"
+  end
+
   depends_on "NatronGitHub/qt4/qt@4"
 
   # Put data and import files into this formula's cellar instead of installing them globally.
@@ -14,23 +19,20 @@ class QtWebkitAT23 < Formula
     ENV["QTDIR"] = Formula["NatronGitHub/qt4/qt@4"].opt_prefix
     ENV["INSTALL_DATA"] = "#{prefix}/etc/qt4"
     ENV["INSTALL_LIBS"] = lib
-    system "Tools/Scripts/build-webkit", "--qt", "--no-webkit2", "--no-video", "--install-headers=#{include}", "--install-libs=#{lib}", "--minimal"
+    system "Tools/Scripts/build-webkit", "--qt", "--no-webkit2", "--no-video", "--install-headers=#{include}",
+"--install-libs=#{lib}", "--minimal"
     system "make", "-C", "WebKitBuild/Release", "install"
   end
 
-  def caveats; <<~EOS
-    This is years old and really insecure. You shouldn't
-    use it if you don't absolutely trust the HTML files 
-    you're using it to browse. Definely avoid using it
-    in a general-purpose Web browser.
-    
-    Also, video doesn't work.
+  def caveats
+    <<~EOS
+          This is years old and really insecure. You shouldn't
+          use it if you don't absolutely trust the HTML files#{" "}
+          you're using it to browse. Definely avoid using it
+          in a general-purpose Web browser.
+      #{"    "}
+          Also, video doesn't work.
     EOS
-  end
-  
-  bottle do
-    root_url "https://dl.bintray.com/devernay/bottles-qt4"
-    sha256 "773ffe1a0c26ab27824bed4d1d5fa55655ca0f454cc938585d122ae000fd21ff" => :mojave
   end
 end
 

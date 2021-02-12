@@ -10,7 +10,7 @@ class OpensslAT10 < Formula
     root_url "https://dl.bintray.com/devernay/bottles-qt4"
     rebuild 1
     sha256 big_sur: "0fcf1e16cb0637bc46f10bbf3b55b2e0881ff42a605a04829231b86a8c26a742"
-    sha256 mojave: "faa8d3dc06601237a6f42a93ec6d8b0229426f01ea109e3fab691ac1cf9fd681"
+    sha256 mojave:  "faa8d3dc06601237a6f42a93ec6d8b0229426f01ea109e3fab691ac1cf9fd681"
   end
 
   keg_only :provided_by_macos,
@@ -69,14 +69,15 @@ class OpensslAT10 < Formula
     (openssldir/"cert.pem").atomic_write(valid_certs.join("\n") << "\n")
   end
 
-  def caveats; <<~EOS
-    A CA file has been bootstrapped using certificates from the SystemRoots
-    keychain. To add additional certificates (e.g. the certificates added in
-    the System keychain), place .pem files in
-      #{openssldir}/certs
-    and run
-      #{opt_bin}/c_rehash
-  EOS
+  def caveats
+    <<~EOS
+      A CA file has been bootstrapped using certificates from the SystemRoots
+      keychain. To add additional certificates (e.g. the certificates added in
+      the System keychain), place .pem files in
+        #{openssldir}/certs
+      and run
+        #{opt_bin}/c_rehash
+    EOS
   end
 
   test do

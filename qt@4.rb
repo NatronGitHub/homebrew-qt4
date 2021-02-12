@@ -6,7 +6,7 @@ class QtAT4 < Formula
   sha256 "e2882295097e47fe089f8ac741a95fef47e0a73a3f3cdf21b56990638f626ea0"
   revision 7
 
-  head "https://code.qt.io/qt/qt.git", :branch => "4.8"
+  head "https://code.qt.io/qt/qt.git", branch: "4.8"
 
   bottle do
     root_url "https://dl.bintray.com/devernay/bottles-qt4"
@@ -14,6 +14,21 @@ class QtAT4 < Formula
   end
 
   # https://bugreports.qt.io/browse/QTBUG-49607
+  option "with-docs", "Build documentation"
+
+  deprecated_option "qtdbus" => "with-dbus"
+  deprecated_option "with-d-bus" => "with-dbus"
+
+  depends_on "openssl@1.0"
+  depends_on "dbus" => :optional
+  depends_on "mysql" => :optional
+  depends_on "postgresql" => :optional
+
+  resource "test-project" do
+    url "https://gist.github.com/tdsmith/f55e7e69ae174b5b5a03.git",
+        revision: "6f565390395a0259fa85fdd3a4f1968ebcd1cc7d"
+  end
+
   patch :p0 do
     # bugreports.qt.io may go away, use our local copy.
     # url "https://bugreports.qt.io/secure/attachment/52520/patch-qthread-stacksize.diff"
@@ -33,13 +48,13 @@ class QtAT4 < Formula
     url "https://raw.githubusercontent.com/Homebrew/formula-patches/480b7142c4e2ae07de6028f672695eb927a34875/qt/el-capitan.patch"
     sha256 "c8a0fa819c8012a7cb70e902abb7133fc05235881ce230235d93719c47650c4e"
   end
-  
+
   # Backport of Qt5 patch to fix an issue with null bytes in QSetting strings.
   patch do
     url "https://raw.githubusercontent.com/cartr/homebrew-qt4/41669527a2aac6aeb8a5eeb58f440d3f3498910a/patches/qsetting-nulls.patch"
     sha256 "0deb4cd107853b1cc0800e48bb36b3d5682dc4a2a29eb34a6d032ac4ffe32ec3"
   end
-  
+
   # Patch to fix build on macOS High Sierra
   patch :p0 do
     url "https://raw.githubusercontent.com/cartr/homebrew-qt4/c957b2d755c762b77142e35f68cddd7f0986bc7b/patches/qt4-versions-without-underscores.patch"
@@ -64,21 +79,6 @@ class QtAT4 < Formula
     sha256 "5e81df9a1c35a5aec21241a82707ad6ac198b2e44928389722b64da341260c5d"
   end
 
-  option "with-docs", "Build documentation"
-
-  depends_on "openssl@1.0"
-  depends_on "dbus" => :optional
-  depends_on "mysql" => :optional
-  depends_on "postgresql" => :optional
-
-  deprecated_option "qtdbus" => "with-dbus"
-  deprecated_option "with-d-bus" => "with-dbus"
-
-  resource "test-project" do
-    url "https://gist.github.com/tdsmith/f55e7e69ae174b5b5a03.git",
-        :revision => "6f565390395a0259fa85fdd3a4f1968ebcd1cc7d"
-  end
-
   def install
     if MacOS.sdk_path_if_needed
       # Qt attempts to build with a 10.4 deployment target, even though
@@ -87,16 +87,18 @@ class QtAT4 < Formula
       # but it's now completely broken because Xcode10/Mojave moved all the
       # headers around.
       inreplace "configure", "MACOSX_DEPLOYMENT_TARGET 10.4", "MACOSX_DEPLOYMENT_TARGET 10.9"
-      inreplace "src/tools/bootstrap/bootstrap.pro", "MACOSX_DEPLOYMENT_TARGET = 10.4", "MACOSX_DEPLOYMENT_TARGET = 10.9"
+      inreplace "src/tools/bootstrap/bootstrap.pro", "MACOSX_DEPLOYMENT_TARGET = 10.4",
+"MACOSX_DEPLOYMENT_TARGET = 10.9"
       inreplace "mkspecs/common/mac.conf", "MACOSX_DEPLOYMENT_TARGET = 10.4", "MACOSX_DEPLOYMENT_TARGET = 10.9"
       inreplace "qmake/qmake.pri", "MACOSX_DEPLOYMENT_TARGET = 10.4", "MACOSX_DEPLOYMENT_TARGET = 10.9"
-      inreplace "mkspecs/unsupported/macx-clang-libc++/qmake.conf", "MACOSX_DEPLOYMENT_TARGET = 10.7", "MACOSX_DEPLOYMENT_TARGET = 10.9"
+      inreplace "mkspecs/unsupported/macx-clang-libc++/qmake.conf", "MACOSX_DEPLOYMENT_TARGET = 10.7",
+"MACOSX_DEPLOYMENT_TARGET = 10.9"
     end
 
     args = %W[
       -prefix #{prefix}
-      -plugindir #{prefix}/lib/qt4/plugins
-      -importdir #{prefix}/lib/qt4/imports
+      -plugindir #{lib}/qt4/plugins
+      -importdir #{lib}/qt4/imports
       -datadir #{prefix}/etc/qt4
       -release
       -opensource
@@ -116,10 +118,10 @@ class QtAT4 < Formula
     if ENV.compiler == :clang
       args << "-platform"
 
-      if MacOS.version >= :mavericks
-        args << "unsupported/macx-clang-libc++"
+      args << if MacOS.version >= :mavericks
+        "unsupported/macx-clang-libc++"
       else
-        args << "unsupported/macx-clang"
+        "unsupported/macx-clang"
       end
     end
 
@@ -146,21 +148,23 @@ class QtAT4 < Formula
     args << "-nomake" << "docs" if build.without? "docs"
 
     args << "-arch" << "x86_64"
-    
+
     # Patch macdeployqt so it finds the plugin path
-    inreplace "tools/macdeployqt/macdeployqt/main.cpp", '"/Developer/Applications/Qt/plugins"', "\"#{HOMEBREW_PREFIX}/lib/qt4/plugins\""
-    inreplace "tools/macdeployqt/macdeployqt/main.cpp", 'deploymentInfo.qtPath + "/plugins"', "\"#{HOMEBREW_PREFIX}/lib/qt4/plugins\""
+    inreplace "tools/macdeployqt/macdeployqt/main.cpp", '"/Developer/Applications/Qt/plugins"',
+"\"#{HOMEBREW_PREFIX}/lib/qt4/plugins\""
+    inreplace "tools/macdeployqt/macdeployqt/main.cpp", 'deploymentInfo.qtPath + "/plugins"',
+"\"#{HOMEBREW_PREFIX}/lib/qt4/plugins\""
 
     system "./configure", *args
     system "make"
     ENV.deparallelize
     system "make", "install"
-    
+
     # Delete qmake, as we'll be rebuilding it
     system "rm", "bin/qmake"
     system "rm", "#{bin}/qmake"
     system "make", "clean"
-    
+
     # Patch the configure script so the built qmake can find Webkit if installed
     inreplace "configure", '=$QT_INSTALL_PREFIX"`', "=#{HOMEBREW_PREFIX}\"`"
     inreplace "configure", '=$QT_INSTALL_DOCS"`', "=#{HOMEBREW_PREFIX}/doc\"`"
@@ -189,7 +193,7 @@ class QtAT4 < Formula
     Pathname.glob("#{lib}/*.framework/Headers") do |path|
       include.install_symlink path => path.parent.basename(".framework")
     end
-    
+
     # Make `HOMEBREW_PREFIX/lib/qt4/plugins` an additional plug-in search path
     # for Qt Designer to support formulae that provide Qt Designer plug-ins.
     system "/usr/libexec/PlistBuddy",
@@ -199,14 +203,15 @@ class QtAT4 < Formula
     Pathname.glob("#{bin}/*.app") { |app| mv app, prefix }
   end
 
-  def caveats; <<~EOS
-    We agreed to the Qt opensource license for you.
-    If this is unacceptable you should uninstall.
-
-    Phonon is not supported on macOS Sierra or with Xcode 8.
-    
-    WebKit is no longer included for security reasons. If you absolutely
-    need it, it can be installed with `brew install qt-webkit@2.3`.
+  def caveats
+    <<~EOS
+                We agreed to the Qt opensource license for you.
+                If this is unacceptable you should uninstall.
+      #{"      "}
+                Phonon is not supported on macOS Sierra or with Xcode 8.
+            #{"    "}
+                WebKit is no longer included for security reasons. If you absolutely
+                need it, it can be installed with `brew install qt-webkit@2.3`.
     EOS
   end
 
@@ -217,5 +222,4 @@ class QtAT4 < Formula
     system "make"
     assert_match(/GitHub/, pipe_output(testpath/"qtnetwork-test 2>&1", nil, 0))
   end
-  
 end

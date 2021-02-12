@@ -1,6 +1,6 @@
 class Rcssserver < Formula
   desc "Server for RoboCup Soccer Simulator"
-  homepage "http://sserver.sourceforge.net/"
+  homepage "https://sserver.sourceforge.io/"
   revision 4
 
   stable do

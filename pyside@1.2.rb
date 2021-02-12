@@ -1,29 +1,26 @@
 class PysideAT12 < Formula
   desc "Python bindings for Qt"
   homepage "https://wiki.qt.io/PySide"
-  url "https://codeload.github.com/pyside/PySide/tar.gz/1.2.4"
+  url "https://github.com/pyside/PySide/archive/1.2.4.tar.gz"
   mirror "https://distfiles.macports.org/py-pyside/PySide-1.2.4.tar.gz"
   sha256 "90f2d736e2192ac69e5a2ac798fce2b5f7bf179269daa2ec262986d488c3b0f7"
 
   head "https://github.com/PySide/PySide.git"
 
   bottle do
-    cellar :any
     root_url "https://dl.bintray.com/devernay/bottles-qt4"
-    sha256 "c3a85d2ad28306550cc8e844ad53edd9b7756e6643f8b80b2231354c8e016f35" => :mojave
+    sha256 cellar: :any, mojave: "c3a85d2ad28306550cc8e844ad53edd9b7756e6643f8b80b2231354c8e016f35"
   end
 
   # don't use depends_on :python because then bottles install Homebrew's python
   option "without-python@2", "Build without python 2 support"
-  depends_on "python@2" => :recommended if MacOS.version <= :snow_leopard
-  depends_on "python" => :optional
-
   option "without-docs", "Skip building documentation"
-
   depends_on "cmake" => :build
   depends_on "sphinx-doc" => :build if build.with? "docs"
-  depends_on "NatronGitHub/qt4/qt@4"
   depends_on "NatronGitHub/qt4/qt-webkit@2.3"
+  depends_on "NatronGitHub/qt4/qt@4"
+  depends_on "python@2" => :recommended if MacOS.version <= :snow_leopard
+  depends_on "python" => :optional
 
   if build.with? "python"
     depends_on "NatronGitHub/qt4/shiboken@1.2" => "with-python"

@@ -1,6 +1,6 @@
 class Qwtpolar < Formula
   desc "Library for displaying values on a polar coordinate system"
-  homepage "http://qwtpolar.sourceforge.net/"
+  homepage "https://qwtpolar.sourceforge.io/"
   url "https://downloads.sf.net/project/qwtpolar/qwtpolar/1.1.0/qwtpolar-1.1.0.tar.bz2"
   sha256 "e45a1019b481f52a63483c536c5ef3225f1cced04abf45d7d0ff8e06d30e2355"
   revision 1
@@ -37,12 +37,12 @@ class Qwtpolar < Formula
              "\\1/lib/qt4/\\2"
     end
 
-    args = %W[-config release -spec]
+    args = %w[-config release -spec]
     # On Mavericks we want to target libc++, this requires a unsupported/macx-clang-libc++ flag
-    if ENV.compiler == :clang && MacOS.version >= :mavericks
-      args << "unsupported/macx-clang-libc++"
+    args << if ENV.compiler == :clang && MacOS.version >= :mavericks
+      "unsupported/macx-clang-libc++"
     else
-      args << "macx-g++"
+      "macx-g++"
     end
 
     ENV["QMAKEFEATURES"] = "#{Formula["NatronGitHub/qt4/qwt-qt4"].opt_prefix}/features"
