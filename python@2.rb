@@ -1,3 +1,9 @@
+# python@2 formula based on the last revision in homebrew-core, with some minor changes
+# The only significant change from the original formula is that we adapt some behavior from the
+# python@3 formula, moving the unversioned binaries (python, pip, etc) into `libexec/bin/` instead of
+# in `bin/` to avoid conflicting. See `#caveats` for an explanation.
+# ref: https://github.com/Homebrew/homebrew-core/blob/669a46d034adeb61a983ec393c04c556222f551c/Formula/python%402.rb
+
 class PythonAT2 < Formula
   desc "Interpreted, interactive, object-oriented programming language"
   homepage "https://www.python.org/"
@@ -12,22 +18,17 @@ class PythonAT2 < Formula
     sha256 mojave:   "54d3351d6be8268b2f5017894dcc8e083811dfa3812bdb9f79f989873b9a4542"
   end
 
-  # setuptools remembers the build flags python is built with and uses them to
-  # build packages later. Xcode-only systems need different flags.
-  pour_bottle? do
-    reason <<~EOS
-      The bottle needs the Apple Command Line Tools to be installed.
-        You can install them, if desired, with:
-          xcode-select --install
-    EOS
-    satisfy { MacOS::CLT.installed? }
-  end
-
   depends_on "pkg-config" => :build
   depends_on "gdbm"
   depends_on "openssl@1.1"
   depends_on "readline"
   depends_on "sqlite"
+  unless OS.mac?
+    depends_on "linuxbrew/xorg/xorg" if build.with? "tcl-tk"
+    depends_on "bzip2"
+    depends_on "ncurses"
+    depends_on "zlib"
+  end
 
   resource "setuptools" do
     url "https://files.pythonhosted.org/packages/f4/d5/a6c19dcbcbc267aca376558797f036d9bcdff344c9f785fe7d0fe9a5f2a7/setuptools-41.4.0.zip"
@@ -45,7 +46,8 @@ class PythonAT2 < Formula
   end
 
   def lib_cellar
-    prefix/"Frameworks/Python.framework/Versions/2.7/lib/python2.7"
+    prefix / (OS.mac? ? "Frameworks/Python.framework/Versions/2.7" : "") /
+      "lib/python2.7"
   end
 
   def site_packages_cellar
@@ -68,7 +70,7 @@ class PythonAT2 < Formula
       --enable-ipv6
       --datarootdir=#{share}
       --datadir=#{share}
-      --enable-framework=#{frameworks}
+      #{OS.mac? ? "--enable-framework=#{frameworks}" : "--enable-shared"}
       --without-ensurepip
     ]
 
@@ -87,7 +89,7 @@ class PythonAT2 < Formula
     ldflags  = []
     cppflags = []
 
-    if MacOS.sdk_path_if_needed
+    if OS.mac? && MacOS.sdk_path_if_needed
       # Help Python's build system (setuptools/pip) to build things on SDK-based systems
       # The setup.py looks at "-isysroot" to get the sysroot (and not at --sysroot)
       cflags  << "-isysroot #{MacOS.sdk_path}" << "-I#{MacOS.sdk_path}/usr/include"
@@ -98,8 +100,16 @@ class PythonAT2 < Formula
       cflags  << "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
     end
 
+    # Python's setup.py parses CPPFLAGS and LDFLAGS to learn search
+    # paths for the dependencies of the compiled extension modules.
+    # See Homebrew/linuxbrew#420, Homebrew/linuxbrew#460, and Homebrew/linuxbrew#875
+    unless OS.mac?
+      cppflags << ENV.cppflags << " -I#{HOMEBREW_PREFIX}/include"
+      ldflags << ENV.ldflags << " -L#{HOMEBREW_PREFIX}/lib"
+    end
+
     # Avoid linking to libgcc https://code.activestate.com/lists/python-dev/112195/
-    args << "MACOSX_DEPLOYMENT_TARGET=#{MacOS.version}"
+    args << "MACOSX_DEPLOYMENT_TARGET=#{MacOS.version.to_f}"
 
     # We want our readline and openssl! This is just to outsmart the detection code,
     # superenv handles that cc finds includes/libs!
@@ -137,34 +147,44 @@ class PythonAT2 < Formula
     ENV.deparallelize do
       # Tell Python not to install into /Applications
       system "make", "install", "PYTHONAPPSDIR=#{prefix}"
-      system "make", "frameworkinstallextras", "PYTHONAPPSDIR=#{pkgshare}"
+      system "make", "frameworkinstallextras", "PYTHONAPPSDIR=#{pkgshare}" if OS.mac?
     end
+
+    Dir.glob("#{prefix}/*.app") { |app| mv app, app.sub(/\.app$/, " 2.app") }
 
     # Fixes setting Python build flags for certain software
     # See: https://github.com/Homebrew/homebrew/pull/20182
     # https://bugs.python.org/issue3588
-    inreplace lib_cellar/"config/Makefile" do |s|
-      s.change_make_var! "LINKFORSHARED",
-        "-u _PyMac_Error $(PYTHONFRAMEWORKINSTALLDIR)/Versions/$(VERSION)/$(PYTHONFRAMEWORK)"
+    if OS.mac?
+      inreplace lib_cellar/"config/Makefile" do |s|
+        s.change_make_var! "LINKFORSHARED",
+          "-u _PyMac_Error $(PYTHONFRAMEWORKINSTALLDIR)/Versions/$(VERSION)/$(PYTHONFRAMEWORK)"
+      end
     end
 
-    # Prevent third-party packages from building against fragile Cellar paths
-    inreplace [lib_cellar/"_sysconfigdata.py",
-               lib_cellar/"config/Makefile",
-               frameworks/"Python.framework/Versions/Current/lib/pkgconfig/python-2.7.pc"],
-              prefix, opt_prefix
+    if OS.mac?
+      # Prevent third-party packages from building against fragile Cellar paths
+      inreplace [lib_cellar/"_sysconfigdata.py",
+                 lib_cellar/"config/Makefile",
+                 frameworks/"Python.framework/Versions/Current/lib/pkgconfig/python-2.7.pc"],
+                prefix, opt_prefix
+    end
 
     # Symlink the pkgconfig files into HOMEBREW_PREFIX so they're accessible.
     (lib/"pkgconfig").install_symlink Dir[frameworks/"Python.framework/Versions/Current/lib/pkgconfig/*"]
 
-    # Remove 2to3 because Python 3 also installs it
-    rm bin/"2to3"
+    # Remove all of the unversioned binaries
+    %w[2to3 idle pydoc python python-config pythonw smtpd.py].each do |f|
+      rm bin/f
+    end
 
     # A fix, because python and python@2 both want to install Python.framework
     # and therefore we can't link both into HOMEBREW_PREFIX/Frameworks
     # https://github.com/Homebrew/homebrew/issues/15943
-    ["Headers", "Python", "Resources"].each { |f| rm(prefix/"Frameworks/Python.framework/#{f}") }
-    rm prefix/"Frameworks/Python.framework/Versions/Current"
+    if OS.mac?
+      ["Headers", "Python", "Resources"].each { |f| rm(prefix/"Frameworks/Python.framework/#{f}") }
+      rm prefix/"Frameworks/Python.framework/Versions/Current"
+    end
 
     # Remove the site-packages that Python created in its Cellar.
     site_packages_cellar.rmtree
@@ -172,6 +192,15 @@ class PythonAT2 < Formula
     (libexec/"setuptools").install resource("setuptools")
     (libexec/"pip").install resource("pip")
     (libexec/"wheel").install resource("wheel")
+
+    {
+      "idle"          => "idle2",
+      "pydoc"         => "pydoc2",
+      "python"        => "python2",
+      "python-config" => "python2-config",
+    }.each do |unversioned_name, versioned_name|
+      (libexec/"bin").install_symlink (bin/versioned_name).realpath => unversioned_name
+    end
   end
 
   def post_install
@@ -194,7 +223,7 @@ class PythonAT2 < Formula
 
     # Write our sitecustomize.py
     rm_rf Dir["#{site_packages}/sitecustomize.py[co]"]
-    (site_packages/"sitecustomize.py").atomic_write(sitecustomize)
+    (site_packages/"sitecustomize.py").atomic_write(sitecustomize) if OS.mac?
 
     # Remove old setuptools installations that may still fly around and be
     # listed in the easy_install.pth. This can break setuptools build with
@@ -211,13 +240,28 @@ class PythonAT2 < Formula
                   "--install-scripts=#{bin}",
                   "--install-lib=#{site_packages}"]
 
-    (libexec/"setuptools").cd { system "#{bin}/python", *setup_args }
-    (libexec/"pip").cd { system "#{bin}/python", *setup_args }
-    (libexec/"wheel").cd { system "#{bin}/python", *setup_args }
+    (libexec/"setuptools").cd { system "#{bin}/python2", *setup_args }
+    (libexec/"pip").cd { system "#{bin}/python2", *setup_args }
+    (libexec/"wheel").cd { system "#{bin}/python2", *setup_args }
+
+    # Remove unversioned pip and easy_install
+    rm_rf [bin/"pip", bin/"easy_install"]
+
+    # Move unversioned wheel to versioned wheel
+    mv bin/"wheel", bin/"wheel2"
+
+    # Install unversioned symlinks in libexec/bin.
+    {
+      "easy_install" => "easy_install-2.7",
+      "pip"          => "pip2",
+      "wheel"        => "wheel2",
+    }.each do |unversioned_name, versioned_name|
+      (libexec/"bin").install_symlink (bin/versioned_name).realpath => unversioned_name
+    end
 
     # When building from source, these symlinks will not exist, since
     # post_install happens after linking.
-    %w[pip pip2 pip2.7 easy_install easy_install-2.7 wheel].each do |e|
+    %w[pip2 pip2.7 easy_install-2.7 wheel2].each do |e|
       (HOMEBREW_PREFIX/"bin").install_symlink bin/e
     end
 
@@ -290,27 +334,28 @@ class PythonAT2 < Formula
 
   def caveats
     <<~EOS
-      Pip and setuptools have been installed. To update them
-        pip install --upgrade pip setuptools
+      Python has been installed as
+        #{HOMEBREW_PREFIX}/bin/python2
+
+      Unversioned symlinks `python`, `python-config`, `pip` etc. pointing to
+      `python2`, `python2-config`, `pip2` etc., respectively, have been installed into
+        #{opt_libexec}/bin
 
       You can install Python packages with
-        pip install <package>
-
+        pip2 install <package>
       They will install into the site-package directory
-        #{site_packages}
-
-      See: https://docs.brew.sh/Homebrew-and-Python
+        #{HOMEBREW_PREFIX/"lib/python2.7/site-packages"}
     EOS
   end
 
   test do
     # Check if sqlite is ok, because we build with --enable-loadable-sqlite-extensions
     # and it can occur that building sqlite silently fails if OSX's sqlite is used.
-    system "#{bin}/python", "-c", "import sqlite3"
+    system "#{bin}/python2", "-c", "import sqlite3"
     # Check if some other modules import. Then the linked libs are working.
-    system "#{bin}/python", "-c", "import Tkinter; root = Tkinter.Tk()"
-    system "#{bin}/python", "-c", "import gdbm"
-    system "#{bin}/python", "-c", "import zlib"
-    system bin/"pip", "list", "--format=columns"
+    system "#{bin}/python2", "-c", "import Tkinter; root = Tkinter.Tk()" if OS.mac?
+    system "#{bin}/python2", "-c", "import gdbm"
+    system "#{bin}/python2", "-c", "import zlib"
+    system bin/"pip2", "list", "--format=columns"
   end
 end
